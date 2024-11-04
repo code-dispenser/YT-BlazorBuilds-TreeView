@@ -20,13 +20,13 @@ Welcome to your new app.
 
 
 <div style="display:grid; grid-template-columns: 2fr 5fr; gap:1rem;">
-    <dif>
+    <div>
         <p>Select Mode: <b>@_selectMode.ToString()</b></p>
 
         <TreeView @ref="TreeViewRef" T="MyData" RootNode="_rootNode" IncludeRoot="_includeRoot" SelectMode="_selectMode" 
             OnTreeItemClicked="HandleOnTreeItemClicked" OnTreeItemToggled="HandleOnTreeItemToggled" />
                 
-    </dif>
+    </div>
     <div>
         <p><b>Keyboard support:</b></p>
 
