@@ -1,0 +1,97 @@
+﻿@* @typeparam T
+<ul>
+    @{
+        BuildTree(@RootNode.ChildNodes);
+        
+        void BuildTree(IReadOnlyList<TreeNode<T>> childNodes)
+        {
+            foreach (var childNode in childNodes)
+            {
+                <li>
+                    @childNode.NodeText
+                    @if (childNode.HasChildNodes)
+                    {
+                        <ul> @{BuildTree(childNode.ChildNodes);} </ul>
+                    }
+                </li>
+            }
+        }
+    }
+</ul>
+ *@
+
+
+@typeparam T
+
+<div class="@GetStyleInfo(StyleInfo.TreeViewClass)">
+    @if (true== IncludeRoot)
+    {
+        <ul role="tree" aria-labelledby="@AriaLabelledBy" aria-multiselectable="@(SelectMode == SelectMode.None|| SelectMode == SelectMode.Single ? "false" : "true")">
+            @{BuildListTag(RootNode);}
+        </ul>
+    }
+    else
+    {
+        <ul role="tree" aria-labelledby="@AriaLabelledBy" aria-multiselectable="@(SelectMode == SelectMode.None|| SelectMode == SelectMode.Single ? "false" : "true")">
+            @{BuildTree(RootNode.ChildNodes);}
+        </ul>
+    }
+</div>
+
+@{
+    void BuildTree(IReadOnlyList<TreeNode<T>> childNodes)
+    {
+        @foreach (var treeNode in childNodes)
+        {
+            BuildListTag(treeNode);
+        }
+    }
+
+    void BuildListTag(TreeNode<T> treeNode)
+    {
+        var nodeID      = treeNode.NodeID;
+        var hasChildren = treeNode.HasChildNodes;
+
+        @if (false == FocusItemRefs.ContainsKey(nodeID)) FocusItemRefs.Add(nodeID, new ElementReference());
+
+        <li @ref="FocusItemRefs[nodeID]" @key="treeNode.NodeID" class="@GetStyleInfo(StyleInfo.TreeViewTreeItemClass, hasChildren)" tabindex="@treeNode.TabIndex"
+            @onkeydown="(keyArgs) => HandleKeyDown(keyArgs,treeNode)" @onkeydown:stopPropagation @onkeydown:preventDefault="@PreventDefault"
+            aria-label="@treeNode.NodeText" role="treeitem"
+            aria-selected="@(SelectMode != SelectMode.None ? treeNode.IsSelected.ToString().ToLower() : null)"
+            aria-expanded="@(treeNode.HasChildNodes ? treeNode.IsExpanded.ToString().ToLower() : null)">
+
+            <span class="@GetStyleInfo(StyleInfo.TreeViewItemLayoutClass)" >
+
+                @if (true == hasChildren)
+                {
+                    <span class="@GetStyleInfo(StyleInfo.TreeViewExpanderClass)" @onclick="() => ToggleNode(treeNode)" @onclick:stopPropagation aria-hidden="true"></span>
+                }
+
+                @if (SelectMode == SelectMode.MultipleWithCheckBoxes)
+                {
+                    <span class="@GetStyleInfo(StyleInfo.TreeViewCheckboxClass)">
+                        <input type="checkbox" @bind="treeNode.IsSelected"  @onclick="(args) => ToggleSelected(args,treeNode)" 
+                               @onclick:stopPropagation tabindex="-1" />
+                    </span>
+                }
+
+                @if (false == String.IsNullOrWhiteSpace(treeNode.NodeIconClass))
+                {
+                    <span class="@GetStyleInfo(StyleInfo.TreeViewIconClass) @treeNode.NodeIconClass" aria-hidden="true"></span>
+                }
+                <span class="@GetStyleInfo(StyleInfo.TreeViewTextClass)" @onclick="(args) => ToggleSelected(args, treeNode)" @onclick:stopPropagation>
+                    @treeNode.NodeText
+                </span>
+            </span>
+
+            @if (true == treeNode.HasChildNodes)
+            {
+                <ul role="group" class="@GetStyleInfo(StyleInfo.TreeViewBranchClass)">
+                    @{
+                        BuildTree(treeNode.ChildNodes);
+                    }
+                </ul>
+            }
+        </li>
+    }
+}

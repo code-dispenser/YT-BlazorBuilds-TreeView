@@ -1,0 +1,142 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<h1 id="tree-label">Hello, <span style="text-decoration:line-through">world!</span> Accessible TreeView Component!</h1>
+
+Welcome to your new app.
+
+<p class="mt-4 mb-4">
+    <button class="btn btn-primary" @onclick="() => _includeRoot = !_includeRoot">Toggle Include Root</button>
+    <button class="btn btn-primary" @onclick="() => _selectMode = SelectMode.None">Mode None</button>
+    <button class="btn btn-primary" @onclick="() => _selectMode = SelectMode.Single">Mode Single</button>
+    <button class="btn btn-primary" @onclick="() => _selectMode = SelectMode.Multiple">Mode Multiple</button>
+    <button class="btn btn-primary" @onclick="() => _selectMode = SelectMode.MultipleWithCheckBoxes">Mode Multiple Checkbox</button>
+    <button class="btn btn-primary" @onclick="() => TreeViewRef.ExpandAll()">Expand All</button>
+    <button class="btn btn-primary" @onclick="() => TreeViewRef.CollapsedAll()">Collapse All</button>
+    <button class="btn btn-primary" @onclick="() => TreeViewRef.SelectAll()">Select All</button>
+    <button class="btn btn-primary" @onclick="() => TreeViewRef.DeselectAll()">Deselect All</button>
+</p>
+
+
+<div style="display:grid; grid-template-columns: 2fr 5fr; gap:1rem;">
+    <dif>
+        <p>Select Mode: <b>@_selectMode.ToString()</b></p>
+
+        <TreeView @ref="TreeViewRef" T="MyData" RootNode="_rootNode" IncludeRoot="_includeRoot" SelectMode="_selectMode" 
+            OnTreeItemClicked="HandleOnTreeItemClicked" OnTreeItemToggled="HandleOnTreeItemToggled" />
+                
+    </dif>
+    <div>
+        <p><b>Keyboard support:</b></p>
+
+        <p>I use the term visible to mean nodes where the parent is expanded and can be reached without having to expand the node. The guidelines use terms such as should not open or close a node when discussing
+            up, down, home and end keys.
+        </p>
+        <ul style="display:flex; flex-direction:column; gap: 0.5rem;">
+            <li><b>Up / Down Arrow Keys: </b>Move focus up or down visible nodes.</li>
+            <li><b>Right Arrow Key: </b>Expand a collapsed parent node,if expanded move focus to the first child.</li>
+            <li><b>Left Arrow Key: </b>Collapse an expanded node otherwise move focus to the parent node.</li>
+            <li><b>Home key: </b>Move focus to the first visible node.</li>
+            <li><b>End key: </b>Move focus to the last visible node.</li>
+            <li><b>Single Alphanumeric Key: </b> Move focus to the next visible node starting with the character (case insensitive), cyclic.</li>
+            <li><b>Space key: </b> Activate any node, select/unselect any node dependent on mode.</li>
+            <li><b>Enter key: </b> Expand/collapse parent nodes. Activate leaf node. select/unselect leaf node (single/multiple modes).</li>
+            <li><b>Star key: </b>Expand sibling nodes.</li>
+            <li><b>Shift + Up/Down Arrow Keys: </b>Move focus up/down visible nodes and select/unselect node (multiple modes).</li>
+            <li><b>Ctrl + A Key: </b>Select all visible nodes (Multiple modes).</li>
+            <li><b>Ctrl + Shift + Home Key: </b>Select visible nodes from focused node to first visible node (multiple modes) </li>
+            <li><b>Ctrl + Shift + End Key: </b>Select visible nodes from focused node to first visible node (multiple modes) </li>
+        </ul>
+        <p><b>Mouse support:</b></p>
+        <ul style="display:flex; flex-direction:column; gap: 0.5rem;">
+            <li><b>Click chevron icon:</b> to expand/collapse node</li>
+            <li><b>Click node text/checkbox:</b> to activate. Select node (only one selected at a time without checkboxes)</li>
+            <li><b>Shift +  Click node text / checkbox:</b> to select visible range from focused/selected (multiple modes).</li>
+            <li><b>Ctrl +  Click node text / checkbox:</b> to add/remove from already selected.(multiple modes).</li>
+        </ul>
+    </div>
+</div>
+
+<ul class="mt-4">
+    @foreach(var message in _messages)
+    {
+       <li>@message</li>
+    }
+</ul>
+
+
+@code{
+    public TreeView<MyData> TreeViewRef { get; set; } = default!;
+
+    public record class MyData(int ID, string Description);
+
+    private List<string>     _messages    = [];
+    private TreeNode<MyData> _rootNode    = default!;
+    private SelectMode       _selectMode  = SelectMode.None;
+    private bool             _includeRoot = true;
+
+    protected override void OnInitialized()
+    {
+        _rootNode = BuildTree();
+        base.OnInitialized();
+    }
+    private TreeNode<MyData> BuildTree()
+    {
+        var rootNode        = new TreeNode<MyData>("Foods", "food-icon", new(1, "Food categories"));
+        var Level1Diary     = new TreeNode<MyData>("Dairy", "dairy-icon", new(2, "Dairy categories"));
+        var level1Fish      = new TreeNode<MyData>("Fish", "fish-icon", new(3, "Fish categories"));
+        var Level1FruitVeg  = new TreeNode<MyData>("Fruit & Veg", "veg-icon", new(4, "Fruit & veg categories"));
+        var Level1Meat      = new TreeNode<MyData>("Meat", "meat-icon", new(5, "Meat categories"));
+        
+        Level1Diary.AddChildNode(new("Butter", "keyboard-icon", new(6, "Low salt")));
+        Level1Diary.AddChildNode(new("Cream", null, new(7, "Cornish clotted")));
+        Level1Diary.AddChildNode(new("Milk", null, new(8, "Semi-skimmed")));
+        
+        level1Fish.AddChildNode(new("Salmon", null, new(9, "Farmed in Scotland")));
+        level1Fish.AddChildNode(new("Cod", null, new(10, "Don't forget your chips")));
+        level1Fish.AddChildNode(new("Tuna", null, new(11, "Atlantic Bluefin")));
+
+        var level2Vegetable = new TreeNode<MyData>("Vegetables", null, new(12, "Winter vegetables"));
+        var level2Fruits = new TreeNode<MyData>("Fruits", null, new(13, "Summer fruits"));
+
+        level2Vegetable.AddChildNode(new("Kale", null, new(14, "Nice and healthy")));
+        level2Vegetable.AddChildNode(new("Parsnips", null, new(15, "Lovely roasted")));
+        level2Fruits.AddChildNode(new("Raspberries", null, new(16, "Great on pavlovas")));
+        level2Fruits.AddChildNode(new("Strawberries", null, new(17, "Perfect for Wimbledon")));
+    
+        var level2MeatPork = new TreeNode<MyData>("Pork", null, new(18, "Leicestershire"));
+        var level2MeatLamb = new TreeNode<MyData>("Lamb", null, new(19, "Welsh lamb"));
+        var level2MeatBeef = new TreeNode<MyData>("Beef", null, new(20,"Yorkshire beef"));
+
+        Level1FruitVeg.AddChildNode(level2Vegetable);
+        Level1FruitVeg.AddChildNode(level2Fruits);
+
+        Level1Meat.AddChildNode(level2MeatBeef);
+        Level1Meat.AddChildNode(level2MeatPork);
+        Level1Meat.AddChildNode(level2MeatLamb);
+
+        rootNode.AddChildNode(Level1Diary);
+        rootNode.AddChildNode(level1Fish);
+        rootNode.AddChildNode(Level1FruitVeg);
+        rootNode.AddChildNode(Level1Meat);
+
+        return rootNode;
+    }
+
+    private void HandleOnTreeItemClicked(TreeData<MyData> treeEventData)
+    {
+        var message = $"Clicked {treeEventData.NodeText} - Selected: {treeEventData.IsSelected} - Payload: {treeEventData.Payload}";
+
+        _messages.Insert(0, message);
+        if (_messages.Count == 6) _messages.RemoveAt(5);
+    }
+
+    private void HandleOnTreeItemToggled(TreeData<MyData> treeEventData)
+    {
+        var message = $"Toggled {treeEventData.NodeText} - State:{(treeEventData.IsExpanded ? "Expanded" : "Collapsed")} - Payload: {treeEventData.Payload}";
+
+        _messages.Insert(0, message);
+        if (_messages.Count == 6) _messages.RemoveAt(5);
+    }
+}

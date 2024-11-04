@@ -1,0 +1,134 @@
+﻿@use "_svg-icons";
+
+.tree-view {
+    --focus-bg-clr: rgba(var(--focus-clr-val),0.05);
+    --focus-border-clr: rgba(var(--focus-clr-val),0.25);
+    overflow-x: auto;
+    padding-right: 1rem;
+
+    & ul, li {
+        list-style-type: none;
+        position: relative;
+        max-width: fit-content;
+        pointer-events: none;
+    }
+
+    & > ul {
+        margin: 0;
+        padding: 0;
+    }
+
+    &__branch {
+        margin: 0;
+        padding-left: 2rem;
+        display: none;
+    }
+
+    &__tree-item {
+        margin-block: 0.5rem;
+        pointer-events: all;
+
+        &:focus {
+            outline: none;
+        }
+
+        &--childless {
+            margin-left: 2rem;
+        }
+    }
+
+    &__item-layout {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    &__text {
+        position: relative;
+        font-size: 0.875rem;
+        pointer-events: auto;
+        
+        //stop the browser selecting the on screen text when using multiselect with the mouse.
+        user-select: none;
+
+        //use after to see change as focus and selected are using the pseudo before element
+        &:hover::after {
+            position: absolute;
+            top: 0;
+            left: -0.25rem;
+            content: "";
+            border-radius: 0.25rem;
+            width: calc(100% + 0.5rem);
+            height: calc(100%);
+            outline: 3px solid var(--focus-clr);
+        }
+    }
+
+    &__icon {
+        height: 1.5rem;
+        width: 1.5rem;
+    }
+
+    &__checkbox {
+        display: flex;
+        align-items: center;
+        pointer-events: auto;
+
+        > input[type="checkbox"] {
+            accent-color: var(--focus-clr);
+            min-height: 1rem;
+            min-width: 1rem;
+            cursor: pointer;
+        }
+
+        > input[type="checkbox"]:focus {
+            outline: none;
+        }
+    }
+
+    &__expander {
+        background-color: var(--focus-clr);
+        height: 1.5rem;
+        width: 1.5rem;
+        @extend %chevron-right-icon;
+        transition: transform 100ms ease;
+        cursor: pointer;
+        pointer-events: auto;
+    }
+
+
+    &__tree-item[aria-expanded="true"] > &__branch {
+        display: block;
+    }
+
+    li[aria-expanded="true"] > &__item-layout > &__expander {
+        transform: rotate(90deg);
+    }
+
+    &__tree-item[aria-selected] > &__item-layout > &__text {
+        cursor: pointer;
+    }
+
+    &__tree-item[aria-selected="true"] > &__item-layout > &__text:before {
+        position: absolute;
+        top: 0;
+        left: -0.25rem;
+        content: "";
+        border-radius: 0.25rem;
+        width: calc(100% + 0.5rem);
+        height: calc(100%);
+        background-color: var(--focus-bg-clr);
+        outline: 2px solid var(--focus-border-clr);
+    }
+
+    &__tree-item:focus > &__item-layout > &__text:before {
+        position: absolute;
+        top: 0;
+        left: -0.25rem;
+        content: "";
+        border-radius: 0.25rem;
+        width: calc(100% + 0.5rem);
+        height: calc(100%);
+        outline: 2px solid var(--focus-clr);
+    }
+}
