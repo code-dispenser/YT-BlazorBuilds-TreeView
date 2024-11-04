@@ -4,7 +4,7 @@
 
 This repository contains the solution from my YouTube video showing how to build an accessible tree view component following the ARIA authoring practice guidelines for the tree view pattern.
 
-YouTube video: TBA
+YouTube video: https://youtu.be/zfolJjCB_c4
 
 Coffees welcomed : https://ko-fi.com/codedispenser
 
